@@ -1,7 +1,7 @@
 id,name,region,lat,lon,primary_exposure,offshore_wind_dir_deg,tide_station,ndbc_station,notes
-ocean_beach_n,Ocean Beach (North),San Francisco,37.8066,-122.5072,W,90,9414290,46026,"Near Balboa/Stairwells; west-facing; offshore wind ~E"
-ocean_beach_mid,Ocean Beach (Mid),San Francisco,37.7687,-122.5072,W,90,9414290,46026,"Around Noriega/Taraval; west-facing"
-ocean_beach_s,Ocean Beach (South),San Francisco,37.7300,-122.5055,W,90,9414290,46026,"Toward Sloat/Funston; west-facing"
+ocean_beach_n,Ocean Beach (North),San Francisco,37.7728,-122.5100,W,90,9414290,46026,"Near Great Hwy & Fulton; north Ocean Beach access"
+ocean_beach_mid,Ocean Beach (Mid),San Francisco,37.7547,-122.5100,W,90,9414290,46026,"Near Great Hwy & Noriega; mid Ocean Beach access"
+ocean_beach_s,Ocean Beach (South),San Francisco,37.7347,-122.5092,W,90,9414290,46026,"Near Great Hwy & Sloat; south Ocean Beach access"
 baker_beach,Baker Beach,San Francisco,37.7936,-122.4842,W,90,9414290,46026,"Protected by headlands; can differ from Ocean Beach"
 china_beach,China Beach,San Francisco,37.7897,-122.4825,NW,110,9414290,46026,"Sheltered cove; still show regional conditions"
 crissy_field,Crissy Field,San Francisco,37.8056,-122.4659,N,180,9414290,46026,"Inside Golden Gate; not ocean swell surf, but was included in earlier version"

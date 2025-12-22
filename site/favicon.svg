@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <title>Surf</title>
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#1bb7a6"/>
+      <stop offset="1" stop-color="#2f4ba0"/>
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="14" fill="#0b1020"/>
+  <path d="M48 40c-3 8-11 14-20 14C17 54 8 45 8 34c0-9 6-16 14-19 9-3 19 2 22 11-7-6-18-4-23 4-5 8-1 18 9 20 7 2 14-2 18-10z" fill="url(#g)"/>
+  <path d="M21 31c3-6 10-9 16-7" fill="none" stroke="#e9eefc" stroke-width="3" stroke-linecap="round" opacity="0.9"/>
+  <circle cx="43.5" cy="22.5" r="2.2" fill="#e9eefc" opacity="0.9"/>
+</svg>
+
+

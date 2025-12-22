@@ -398,9 +398,8 @@ def ensure_dir(path: str) -> None:
 def main() -> int:
     repo_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
     locations_path = os.path.join(repo_root, "data", "locations.csv")
-    # GitHub Pages "Deploy from a branch" only supports /(root) or /docs.
-    # We publish the site from /docs, so data artifacts must live in docs/data.
-    out_dir = os.path.join(repo_root, "docs", "data")
+    # Site output folder used by the GitHub Pages deploy workflow.
+    out_dir = os.path.join(repo_root, "site", "data")
     ensure_dir(out_dir)
 
     now = utc_now()

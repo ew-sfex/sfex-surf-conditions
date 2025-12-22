@@ -1,5 +1,5 @@
 // Mapbox token (public). Replace this before publishing.
-const MAPBOX_TOKEN = "pk.eyJ1IjoiZXZud2xnIiwiYSI6ImNtamg4dmU4dDB4ZWQzZ3B3cXg5YWlqbTAifQ.q2P5dONUVVfs9jt38DVe-w";
+const MAPBOX_TOKEN = "REPLACE_ME_WITH_MAPBOX_PUBLIC_TOKEN";
 
 const DATA_GEOJSON_URL = "./data/beaches.geojson";
 const DATA_SUMMARY_URL = "./data/summary.json";

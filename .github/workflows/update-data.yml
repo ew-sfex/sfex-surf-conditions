@@ -6,11 +6,20 @@ on:
   workflow_dispatch: {}
 
 permissions:
-  contents: write
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: github-pages
+  cancel-in-progress: true
 
 jobs:
-  build-data:
+  build-and-deploy:
     runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -25,11 +34,39 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Build GeoJSON
+      - name: Build data
         run: |
           python scripts/fetch_and_build.py
 
-      - name: Commit updated data (if changed)
+      - name: Write config.js from secret
+        env:
+          MAPBOX_PUBLIC_TOKEN: ${{ secrets.MAPBOX_PUBLIC_TOKEN }}
+        run: |
+          python - <<'PY'
+          import os
+          import json
+          token = os.environ.get("MAPBOX_PUBLIC_TOKEN","").strip()
+          if not token:
+            raise SystemExit("Missing secret MAPBOX_PUBLIC_TOKEN")
+          # Write JS safely (JSON string encoding)
+          js = "window.SFEX_SURF_MAPBOX_TOKEN = " + json.dumps(token) + ";\n"
+          os.makedirs("site", exist_ok=True)
+          with open("site/config.js", "w", encoding="utf-8") as f:
+            f.write(js)
+          print("Wrote site/config.js")
+          PY
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"

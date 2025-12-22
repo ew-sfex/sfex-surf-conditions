@@ -4,9 +4,9 @@ Static Mapbox interactive hosted on GitHub Pages, with **hourly data updates** v
 
 ## What this repo does
 - GitHub Actions runs an hourly Python job to fetch public data and build:
-  - `public/data/beaches.geojson` (one feature per beach/spot with metrics + score)
-  - `public/data/summary.json` (update timestamp + source health)
-- The frontend (`public/`) loads the GeoJSON and renders an interactive map with popups.
+  - `site/data/beaches.geojson` (one feature per beach/spot with metrics + score)
+  - `site/data/summary.json` (update timestamp + source health)
+- GitHub Actions deploys the static site from `site/` to GitHub Pages.
 
 ## Data sources (v1: free/public)
 - **NOAA NDBC** (waves + wind): we use the station real-time text feed:
@@ -21,22 +21,22 @@ Attribution requirements vary; the UI should include an attribution line (NOAA, 
 
 ## Configuration
 ### Mapbox token
-Set a Mapbox public token in `public/app.js` (search for `MAPBOX_TOKEN`).
+No token is committed in source code.\n+\n+Add a GitHub Actions secret named `MAPBOX_PUBLIC_TOKEN` (repo → Settings → Secrets and variables → Actions), and the deploy workflow injects it into `site/config.js` at build time.
 
 ### Locations list
 Edit `data/locations.csv` to add/remove surf spots, set their exposures, and (optionally) map them to sensors.
 
 ## Local preview
-You can serve the `docs/` folder locally (matches GitHub Pages hosting):
+You can serve the `site/` folder locally:
 
 ```bash
-python3 -m http.server --directory docs 8000
+python3 -m http.server --directory site 8000
 ```
 
 Then open `http://localhost:8000`.
 
 ## GitHub Pages
-Configure GitHub Pages to serve from the `main` branch `/docs` folder (via repo Settings → Pages).
+Configure GitHub Pages to use **GitHub Actions** as the source (repo → Settings → Pages → Source: GitHub Actions).
 
 ## Embed snippet (SF Examiner CMS)
 Once GitHub Pages is enabled, embed the interactive with an iframe. Example (adjust height as needed):

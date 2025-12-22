@@ -1,5 +1,7 @@
-// Mapbox token (public). Replace this before publishing.
-const MAPBOX_TOKEN = "REPLACE_ME_WITH_MAPBOX_PUBLIC_TOKEN";
+// Mapbox token is injected at deploy time into site/config.js as:
+//   window.SFEX_SURF_MAPBOX_TOKEN = "pk...."
+// This keeps the token out of the git repo while still allowing a static site.
+const MAPBOX_TOKEN = window.SFEX_SURF_MAPBOX_TOKEN || "";
 
 const DATA_GEOJSON_URL = "./data/beaches.geojson";
 const DATA_SUMMARY_URL = "./data/summary.json";
@@ -17,25 +19,23 @@ function fmtMaybe(v, suffix = "") {
 }
 
 function qualityColorExpression(metric) {
-  // Mapbox expressions: https://docs.mapbox.com/mapbox-gl-js/style-spec/expressions/
-  // Default to qualityScore.
   const m = metric || "qualityScore";
 
   if (m === "waveHeightFt") {
     return [
       "step",
       ["coalesce", ["get", "waveHeightFt"], 0],
-      "#5b2b7a", // <1
+      "#5b2b7a",
       1,
-      "#2f4ba0", // 1-3
+      "#2f4ba0",
       3,
-      "#1e88a8", // 3-5
+      "#1e88a8",
       5,
-      "#2fb95c", // 5-8
+      "#2fb95c",
       8,
-      "#f0c24b", // 8-12
+      "#f0c24b",
       12,
-      "#e2554f", // 12+
+      "#e2554f",
     ];
   }
 
@@ -43,13 +43,13 @@ function qualityColorExpression(metric) {
     return [
       "step",
       ["coalesce", ["get", "windSuitability"], 0.5],
-      "#e2554f", // <0.2 (bad)
+      "#e2554f",
       0.2,
-      "#f0c24b", // 0.2-0.5
+      "#f0c24b",
       0.5,
-      "#2fb95c", // 0.5-0.8
+      "#2fb95c",
       0.8,
-      "#1bb7a6", // 0.8+
+      "#1bb7a6",
     ];
   }
 
@@ -57,29 +57,28 @@ function qualityColorExpression(metric) {
     return [
       "step",
       ["coalesce", ["get", "tideHeightFt"], 0],
-      "#2f4ba0", // <1
+      "#2f4ba0",
       1,
-      "#1e88a8", // 1-3
+      "#1e88a8",
       3,
-      "#2fb95c", // 3-5
+      "#2fb95c",
       5,
-      "#f0c24b", // 5-7
+      "#f0c24b",
       7,
-      "#e2554f", // 7+
+      "#e2554f",
     ];
   }
 
-  // qualityScore 0..100
   return [
     "step",
     ["coalesce", ["get", "qualityScore"], 0],
-    "#e2554f", // <35
+    "#e2554f",
     35,
-    "#f0c24b", // 35-55
+    "#f0c24b",
     55,
-    "#2fb95c", // 55-75
+    "#2fb95c",
     75,
-    "#1bb7a6", // 75+
+    "#1bb7a6",
   ];
 }
 
@@ -137,8 +136,10 @@ function showErrorBanner(msg) {
 }
 
 async function main() {
-  if (!MAPBOX_TOKEN || MAPBOX_TOKEN.includes("REPLACE_ME")) {
-    showErrorBanner("Missing Mapbox token: set MAPBOX_TOKEN in docs/app.js before publishing.");
+  if (!MAPBOX_TOKEN) {
+    showErrorBanner(
+      "Mapbox token not configured. Ask an editor/dev to set the GitHub Actions secret MAPBOX_PUBLIC_TOKEN and redeploy."
+    );
     return;
   }
 
@@ -189,10 +190,7 @@ async function main() {
   map.on("load", async () => {
     await loadDataAndRefreshSource();
 
-    map.addSource(SOURCE_ID, {
-      type: "geojson",
-      data: beachesGeojson,
-    });
+    map.addSource(SOURCE_ID, { type: "geojson", data: beachesGeojson });
 
     map.addLayer({
       id: LAYER_ID,
@@ -248,7 +246,6 @@ async function main() {
         .addTo(map);
     });
 
-    // Auto-refresh data every 5 minutes in the viewer (even though build is hourly)
     setInterval(() => {
       loadDataAndRefreshSource().catch(() => {});
     }, 5 * 60 * 1000);

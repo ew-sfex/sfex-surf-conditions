@@ -27,18 +27,16 @@ Set a Mapbox public token in `public/app.js` (search for `MAPBOX_TOKEN`).
 Edit `data/locations.csv` to add/remove surf spots, set their exposures, and (optionally) map them to sensors.
 
 ## Local preview
-You can serve the `public/` folder locally:
+You can serve the `docs/` folder locally (matches GitHub Pages hosting):
 
 ```bash
-python3 -m http.server --directory public 8000
+python3 -m http.server --directory docs 8000
 ```
 
 Then open `http://localhost:8000`.
 
 ## GitHub Pages
-Recommended: configure GitHub Pages to serve from the `main` branch `/public` folder (via repo Settings → Pages).
-
-If your GitHub Pages configuration cannot target `/public`, you can instead move contents of `public/` to repo root.
+Configure GitHub Pages to serve from the `main` branch `/docs` folder (via repo Settings → Pages).
 
 ## Embed snippet (SF Examiner CMS)
 Once GitHub Pages is enabled, embed the interactive with an iframe. Example (adjust height as needed):

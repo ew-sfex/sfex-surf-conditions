@@ -155,6 +155,17 @@ function bufferedBounds(sw, ne, bufferLon, bufferLat) {
   );
 }
 
+function computeFeatureBounds(featureCollection) {
+  const b = new mapboxgl.LngLatBounds();
+  const feats = (featureCollection && featureCollection.features) || [];
+  for (const f of feats) {
+    const c = f?.geometry?.coordinates;
+    if (!c || c.length < 2) continue;
+    b.extend(c);
+  }
+  return b;
+}
+
 async function main() {
   if (!MAPBOX_TOKEN) {
     showErrorBanner(
@@ -210,10 +221,13 @@ async function main() {
   map.on("load", async () => {
     await loadDataAndRefreshSource();
 
-    // Initial framing: a deterministic center/zoom that prioritizes the coastline
-    // (fitBounds tends to over-emphasize open-ocean when points hug the coast).
-    // Bias the initial view eastward so the coastline reads better.
-    map.jumpTo({ center: [-122.46, 37.80], zoom: 10.1 });
+    // Initial framing: fit all points on load (including the southern extent).
+    const fb = computeFeatureBounds(beachesGeojson);
+    if (!fb.isEmpty()) {
+      map.fitBounds(fb, { padding: 40, duration: 0, maxZoom: 10.2 });
+    } else {
+      map.jumpTo({ center: [-122.46, 37.80], zoom: 10.1 });
+    }
     // Note: LngLatBounds#pad is not available in all Mapbox GL JS versions.
     map.setMaxBounds(bufferedBounds(COVERAGE_SW, COVERAGE_NE, 0.015, 0.02));
     map.setMinZoom(9.0);

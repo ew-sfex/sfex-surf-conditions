@@ -135,6 +135,19 @@ function showErrorBanner(msg) {
   mapEl.appendChild(div);
 }
 
+const MAP_STYLE = "mapbox://styles/mapbox/light-v11";
+
+function computeFeatureBounds(featureCollection) {
+  const b = new mapboxgl.LngLatBounds();
+  const feats = (featureCollection && featureCollection.features) || [];
+  for (const f of feats) {
+    const c = f?.geometry?.coordinates;
+    if (!c || c.length < 2) continue;
+    b.extend(c);
+  }
+  return b;
+}
+
 async function main() {
   if (!MAPBOX_TOKEN) {
     showErrorBanner(
@@ -147,7 +160,7 @@ async function main() {
 
   const map = new mapboxgl.Map({
     container: "map",
-    style: "mapbox://styles/mapbox/dark-v11",
+    style: MAP_STYLE,
     center: [-122.58, 37.84],
     zoom: 9.4,
     attributionControl: true,
@@ -189,6 +202,21 @@ async function main() {
 
   map.on("load", async () => {
     await loadDataAndRefreshSource();
+
+    // Tighten viewport to only our coverage area (points + buffer).
+    try {
+      const bounds = computeFeatureBounds(beachesGeojson);
+      if (!bounds.isEmpty()) {
+        // Expand the bounds a bit so the map has breathing room.
+        const padded = bounds.pad(0.35);
+        map.fitBounds(padded, { padding: 36, duration: 0, maxZoom: 10.8 });
+        map.setMaxBounds(padded);
+        map.setMinZoom(8.2);
+        map.setMaxZoom(13.5);
+      }
+    } catch {
+      // no-op; keep default view
+    }
 
     map.addSource(SOURCE_ID, { type: "geojson", data: beachesGeojson });
 

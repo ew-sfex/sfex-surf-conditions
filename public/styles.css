@@ -1,0 +1,137 @@
+:root {
+  --bg: #0b1020;
+  --panel: rgba(11, 16, 32, 0.85);
+  --text: #e9eefc;
+  --muted: rgba(233, 238, 252, 0.75);
+  --border: rgba(233, 238, 252, 0.12);
+}
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial,
+    "Apple Color Emoji", "Segoe UI Emoji";
+  color: var(--text);
+}
+
+.app {
+  height: 100%;
+  background: var(--bg);
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+}
+
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 16px;
+  padding: 12px 12px 10px;
+  border-bottom: 1px solid var(--border);
+  background: var(--panel);
+  backdrop-filter: blur(6px);
+}
+
+.kicker {
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.headline {
+  font-size: 18px;
+  font-weight: 700;
+  margin-top: 2px;
+}
+
+.controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.control {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+select {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 6px 8px;
+  border-radius: 8px;
+}
+
+.status {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.map {
+  position: relative;
+}
+
+#map {
+  width: 100%;
+  height: 100%;
+}
+
+.footer {
+  padding: 10px 12px;
+  font-size: 12px;
+  color: var(--muted);
+  border-top: 1px solid var(--border);
+  background: var(--panel);
+  backdrop-filter: blur(6px);
+}
+
+.tooltip {
+  position: absolute;
+  z-index: 10;
+  pointer-events: none;
+  transform: translate(8px, 8px);
+  background: rgba(0, 0, 0, 0.85);
+  color: #fff;
+  padding: 8px 10px;
+  border-radius: 10px;
+  font-size: 12px;
+  max-width: 260px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.tooltip .name {
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.tooltip .row {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.tooltip .label {
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.errorBanner {
+  position: absolute;
+  z-index: 20;
+  left: 12px;
+  right: 12px;
+  top: 12px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(160, 0, 0, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  font-size: 13px;
+}
+
+

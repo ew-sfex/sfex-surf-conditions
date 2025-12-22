@@ -1,0 +1,25 @@
+{
+  "generatedAt": "2025-12-18T22:25:59.848635+00:00",
+  "sources": {
+    "ndbc": {
+      "base": "https://www.ndbc.noaa.gov/data/realtime2",
+      "stationsRequested": [
+        "46013",
+        "46026"
+      ],
+      "stationsOK": [
+        "46013",
+        "46026"
+      ],
+      "stationsError": {}
+    },
+    "coops": {
+      "base": "https://api.tidesandcurrents.noaa.gov/api/prod/datagetter",
+      "stationsRequested": [
+        "9414290",
+        "9415020"
+      ],
+      "stationsError": {}
+    }
+  }
+}

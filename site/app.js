@@ -139,8 +139,10 @@ const MAP_STYLE = "mapbox://styles/mapbox/light-v11";
 
 // Hand-tuned coverage bounds (SF peninsula + Marin surf coast, with a small buffer).
 // This avoids the “centered in the Pacific” look from fitBounds on coastal points.
-const COVERAGE_SW = [-122.72, 37.52];
-const COVERAGE_NE = [-122.33, 37.98];
+// These bounds are intentionally biased eastward so the coastline is centered
+// (otherwise a coast-hugging dataset looks like “mostly ocean”).
+const COVERAGE_SW = [-122.63, 37.56];
+const COVERAGE_NE = [-122.36, 37.98];
 const COVERAGE_BOUNDS = new mapboxgl.LngLatBounds(COVERAGE_SW, COVERAGE_NE);
 
 function bufferedBounds(sw, ne, bufferLon, bufferLat) {
@@ -211,7 +213,8 @@ async function main() {
       padding: 24,
       duration: 0,
       maxZoom: 10.9,
-      offset: [140, 0],
+      // Negative x moves the fitted content left (reduces empty ocean on the left).
+      offset: [-140, 0],
     });
     // Note: LngLatBounds#pad is not available in all Mapbox GL JS versions.
     map.setMaxBounds(bufferedBounds(COVERAGE_SW, COVERAGE_NE, 0.03, 0.02));

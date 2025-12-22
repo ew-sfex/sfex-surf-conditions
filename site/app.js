@@ -137,16 +137,12 @@ function showErrorBanner(msg) {
 
 const MAP_STYLE = "mapbox://styles/mapbox/light-v11";
 
-function computeFeatureBounds(featureCollection) {
-  const b = new mapboxgl.LngLatBounds();
-  const feats = (featureCollection && featureCollection.features) || [];
-  for (const f of feats) {
-    const c = f?.geometry?.coordinates;
-    if (!c || c.length < 2) continue;
-    b.extend(c);
-  }
-  return b;
-}
+// Hand-tuned coverage bounds (SF peninsula + Marin surf coast, with a small buffer).
+// This avoids the “centered in the Pacific” look from fitBounds on coastal points.
+const COVERAGE_BOUNDS = new mapboxgl.LngLatBounds(
+  [-122.72, 37.52], // SW
+  [-122.33, 37.98] // NE
+);
 
 async function main() {
   if (!MAPBOX_TOKEN) {
@@ -203,20 +199,17 @@ async function main() {
   map.on("load", async () => {
     await loadDataAndRefreshSource();
 
-    // Tighten viewport to only our coverage area (points + buffer).
-    try {
-      const bounds = computeFeatureBounds(beachesGeojson);
-      if (!bounds.isEmpty()) {
-        // Expand the bounds a bit so the map has breathing room.
-        const padded = bounds.pad(0.22);
-        map.fitBounds(padded, { padding: 36, duration: 0, maxZoom: 10.8 });
-        map.setMaxBounds(padded);
-        map.setMinZoom(8.2);
-        map.setMaxZoom(13.5);
-      }
-    } catch {
-      // no-op; keep default view
-    }
+    // Tight initial framing: use fixed bounds + an eastward offset so the SF coastline
+    // reads better and we don't waste half the viewport on open ocean.
+    map.fitBounds(COVERAGE_BOUNDS, {
+      padding: 24,
+      duration: 0,
+      maxZoom: 10.9,
+      offset: [140, 0],
+    });
+    map.setMaxBounds(COVERAGE_BOUNDS.pad(0.05));
+    map.setMinZoom(8.6);
+    map.setMaxZoom(13.5);
 
     map.addSource(SOURCE_ID, { type: "geojson", data: beachesGeojson });
 

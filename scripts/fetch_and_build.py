@@ -15,6 +15,7 @@ import requests
 
 NDBC_REALTIME2_BASE = "https://www.ndbc.noaa.gov/data/realtime2"
 COOPS_DATAGETTER = "https://api.tidesandcurrents.noaa.gov/api/prod/datagetter"
+OPEN_METEO = "https://api.open-meteo.com/v1/forecast"
 
 APP_ID = "sfexaminer-surf-conditions"
 
@@ -97,6 +98,54 @@ def fetch_text(url: str, timeout_s: int = 20) -> str:
     resp = requests.get(url, timeout=timeout_s, headers={"User-Agent": APP_ID})
     resp.raise_for_status()
     return resp.text
+
+
+def fetch_open_meteo_wind_current(locations: List[LocationRow]) -> Tuple[Dict[str, Dict[str, Any]], Optional[str]]:
+    """
+    Fetch per-location wind using Open-Meteo (no key). This helps avoid "every beach has identical wind"
+    when many points share the same offshore buoy.
+    Returns mapping: location_id -> { windSpeedMph, windDirectionDeg, observedAt }
+    """
+    if not locations:
+        return {}, None
+
+    lats = ",".join([f"{l.lat:.6f}" for l in locations])
+    lons = ",".join([f"{l.lon:.6f}" for l in locations])
+    params = {
+        "latitude": lats,
+        "longitude": lons,
+        "current_weather": "true",
+        "windspeed_unit": "mph",
+        "timezone": "UTC",
+    }
+    try:
+        resp = requests.get(OPEN_METEO, params=params, timeout=20, headers={"User-Agent": APP_ID})
+        resp.raise_for_status()
+        payload = resp.json()
+
+        # Open-Meteo returns arrays when multiple locations are requested.
+        cw = payload.get("current_weather")
+        if not isinstance(cw, list):
+            # Single-location response shape
+            cw = [cw] if isinstance(cw, dict) else []
+
+        out: Dict[str, Dict[str, Any]] = {}
+        for loc, cur in zip(locations, cw):
+            if not isinstance(cur, dict):
+                continue
+            ws = cur.get("windspeed")
+            wd = cur.get("winddirection")
+            t = cur.get("time")
+            if ws is None or wd is None:
+                continue
+            out[loc.id] = {
+                "windSpeedMph": float(ws),
+                "windDirectionDeg": float(wd),
+                "observedAt": t,
+            }
+        return out, None
+    except Exception as e:
+        return {}, f"open_meteo_error:{type(e).__name__}:{e}"
 
 
 def parse_ndbc_realtime2_station(txt: str) -> Dict[str, Any]:
@@ -405,6 +454,9 @@ def main() -> int:
     now = utc_now()
     locations = read_locations_csv(locations_path)
 
+    # Per-location wind (Open-Meteo). Used to reduce identical wind across many beaches sharing a buoy.
+    open_meteo_wind, open_meteo_err = fetch_open_meteo_wind_current(locations)
+
     ndbc_station_ids = sorted({l.ndbc_station for l in locations if l.ndbc_station})
     tide_station_ids = sorted({l.tide_station for l in locations if l.tide_station})
 
@@ -434,7 +486,34 @@ def main() -> int:
     for loc in locations:
         ndbc = ndbc_data.get(loc.ndbc_station) if loc.ndbc_station else None
         tide_height_ft, tide_trend, _ = tide_data.get(loc.tide_station, (None, None, None))
-        features.append(build_feature(loc, now, ndbc, tide_height_ft, tide_trend))
+        feat = build_feature(loc, now, ndbc, tide_height_ft, tide_trend)
+
+        # Override wind fields if Open-Meteo wind is available for this point.
+        ow = open_meteo_wind.get(loc.id)
+        if ow:
+            feat["properties"]["windSpeedMph"] = round(float(ow["windSpeedMph"]), 1)
+            feat["properties"]["windDirectionDeg"] = round(float(ow["windDirectionDeg"]), 0)
+            feat["properties"]["metrics"]["windSpeedMph"] = round(float(ow["windSpeedMph"]), 1)
+            feat["properties"]["metrics"]["windDirectionDeg"] = round(float(ow["windDirectionDeg"]), 0)
+            feat["properties"]["timestamps"]["openMeteoWindObservedAt"] = ow.get("observedAt")
+            feat["properties"]["sources"]["wind"] = "open-meteo"
+        else:
+            feat["properties"]["sources"]["wind"] = "ndbc"
+
+        # Recompute wind suitability + total score if wind changed.
+        ws = feat["properties"].get("windSpeedMph")
+        wd = feat["properties"].get("windDirectionDeg")
+        wind_suit = wind_suitability_score(loc.offshore_wind_dir_deg, wd if isinstance(wd, (int, float)) else None, ws if isinstance(ws, (int, float)) else None)
+        feat["properties"]["windSuitability"] = round(wind_suit, 3)
+        wind_component = 30.0 * wind_suit
+        feat["properties"]["windScore"] = round(wind_component, 1)
+        feat["properties"]["components"]["wind"] = round(wind_component, 1)
+        # Keep swell/tide from existing computed values
+        swell_component = float(feat["properties"]["components"]["swell"])
+        tide_component = float(feat["properties"]["components"]["tide"])
+        feat["properties"]["qualityScore"] = round(clamp(swell_component + wind_component + tide_component, 0.0, 100.0), 1)
+
+        features.append(feat)
 
     fc = {"type": "FeatureCollection", "features": features}
 
@@ -457,6 +536,11 @@ def main() -> int:
                 "base": COOPS_DATAGETTER,
                 "stationsRequested": tide_station_ids,
                 "stationsError": tide_errors,
+            },
+            "open_meteo": {
+                "base": OPEN_METEO,
+                "ok": open_meteo_err is None,
+                "error": open_meteo_err,
             },
         },
     }

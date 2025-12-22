@@ -96,6 +96,7 @@ function buildTooltipHtml(p) {
 function buildPopupHtml(p) {
   const ndbc = p?.sources?.ndbcStation || p?.ndbcStation || "—";
   const tide = p?.sources?.tideStation || p?.tideStation || "—";
+  const windSrc = p?.sources?.wind || "—";
 
   return `
     <div style="min-width:240px; font-family:inherit; color:#111;">
@@ -114,6 +115,7 @@ function buildPopupHtml(p) {
       <div style="margin-top:10px; font-size:11px; color:#444;">
         <div><b>NDBC buoy:</b> ${ndbc}</div>
         <div><b>Tide station:</b> ${tide}</div>
+        <div><b>Wind source:</b> ${windSrc}</div>
         <div><b>Generated:</b> ${p?.timestamps?.generatedAt ? new Date(p.timestamps.generatedAt).toUTCString() : "—"}</div>
         <div><b>Buoy obs:</b> ${p?.timestamps?.ndbcObservedAt ? new Date(p.timestamps.ndbcObservedAt).toUTCString() : "—"}</div>
       </div>

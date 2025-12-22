@@ -109,28 +109,22 @@ def fetch_open_meteo_wind_current(locations: List[LocationRow]) -> Tuple[Dict[st
     if not locations:
         return {}, None
 
-    lats = ",".join([f"{l.lat:.6f}" for l in locations])
-    lons = ",".join([f"{l.lon:.6f}" for l in locations])
-    params = {
-        "latitude": lats,
-        "longitude": lons,
-        "current_weather": "true",
-        "windspeed_unit": "mph",
-        "timezone": "UTC",
-    }
     try:
-        resp = requests.get(OPEN_METEO, params=params, timeout=20, headers={"User-Agent": APP_ID})
-        resp.raise_for_status()
-        payload = resp.json()
-
-        # Open-Meteo returns arrays when multiple locations are requested.
-        cw = payload.get("current_weather")
-        if not isinstance(cw, list):
-            # Single-location response shape
-            cw = [cw] if isinstance(cw, dict) else []
-
+        # Open-Meteo has multiple response shapes depending on multi-location queries.
+        # To keep this robust and avoid parsing edge cases, query each point individually.
         out: Dict[str, Dict[str, Any]] = {}
-        for loc, cur in zip(locations, cw):
+        for loc in locations:
+            params = {
+                "latitude": f"{loc.lat:.6f}",
+                "longitude": f"{loc.lon:.6f}",
+                "current_weather": "true",
+                "windspeed_unit": "mph",
+                "timezone": "UTC",
+            }
+            resp = requests.get(OPEN_METEO, params=params, timeout=20, headers={"User-Agent": APP_ID})
+            resp.raise_for_status()
+            payload = resp.json()
+            cur = payload.get("current_weather") or {}
             if not isinstance(cur, dict):
                 continue
             ws = cur.get("windspeed")

@@ -96,7 +96,8 @@ function buildTooltipHtml(p) {
 function buildPopupHtml(p) {
   const ndbc = p?.sources?.ndbcStation || p?.ndbcStation || "—";
   const tide = p?.sources?.tideStation || p?.tideStation || "—";
-  const windSrc = p?.sources?.wind || "—";
+  // Mapbox flattens properties; nested objects are unreliable. Use a flattened field.
+  const windSrc = p?.windSource || "—";
 
   return `
     <div style="min-width:240px; font-family:inherit; color:#111;">

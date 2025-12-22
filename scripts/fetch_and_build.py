@@ -109,22 +109,58 @@ def fetch_open_meteo_wind_current(locations: List[LocationRow]) -> Tuple[Dict[st
     if not locations:
         return {}, None
 
+    # Prefer a single multi-location request (fewer chances to hit timeouts).
+    lats = ",".join([f"{l.lat:.6f}" for l in locations])
+    lons = ",".join([f"{l.lon:.6f}" for l in locations])
+
+    params = {
+        "latitude": lats,
+        "longitude": lons,
+        "current_weather": "true",
+        "windspeed_unit": "mph",
+        "timezone": "UTC",
+    }
+
+    def do_request(timeout_s: int) -> Any:
+        resp = requests.get(
+            OPEN_METEO,
+            params=params,
+            timeout=timeout_s,
+            headers={"User-Agent": APP_ID},
+        )
+        resp.raise_for_status()
+        return resp.json()
+
     try:
-        # Open-Meteo has multiple response shapes depending on multi-location queries.
-        # To keep this robust and avoid parsing edge cases, query each point individually.
+        # Best-effort retries with shorter timeouts.
+        last_err: Optional[Exception] = None
+        payload: Any = None
+        for timeout_s in (8, 12, 18):
+            try:
+                payload = do_request(timeout_s)
+                last_err = None
+                break
+            except Exception as e:
+                last_err = e
+                payload = None
+                continue
+
+        if payload is None:
+            raise last_err or RuntimeError("unknown_error")
+
+        # Open-Meteo multi-location response returns a list of per-location objects.
+        if isinstance(payload, dict):
+            payload_list = [payload]
+        elif isinstance(payload, list):
+            payload_list = payload
+        else:
+            payload_list = []
+
         out: Dict[str, Dict[str, Any]] = {}
-        for loc in locations:
-            params = {
-                "latitude": f"{loc.lat:.6f}",
-                "longitude": f"{loc.lon:.6f}",
-                "current_weather": "true",
-                "windspeed_unit": "mph",
-                "timezone": "UTC",
-            }
-            resp = requests.get(OPEN_METEO, params=params, timeout=20, headers={"User-Agent": APP_ID})
-            resp.raise_for_status()
-            payload = resp.json()
-            cur = payload.get("current_weather") or {}
+        for loc, obj in zip(locations, payload_list):
+            if not isinstance(obj, dict):
+                continue
+            cur = obj.get("current_weather") or {}
             if not isinstance(cur, dict):
                 continue
             ws = cur.get("windspeed")
@@ -491,8 +527,10 @@ def main() -> int:
             feat["properties"]["metrics"]["windDirectionDeg"] = round(float(ow["windDirectionDeg"]), 0)
             feat["properties"]["timestamps"]["openMeteoWindObservedAt"] = ow.get("observedAt")
             feat["properties"]["sources"]["wind"] = "open-meteo"
+            feat["properties"]["windSource"] = "open-meteo"
         else:
             feat["properties"]["sources"]["wind"] = "ndbc"
+            feat["properties"]["windSource"] = "ndbc"
 
         # Recompute wind suitability + total score if wind changed.
         ws = feat["properties"].get("windSpeedMph")

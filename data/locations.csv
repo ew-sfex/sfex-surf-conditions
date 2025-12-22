@@ -1,12 +1,16 @@
 id,name,region,lat,lon,primary_exposure,offshore_wind_dir_deg,tide_station,ndbc_station,notes
-ocean_beach_n,Ocean Beach (North),San Francisco,37.8066,-122.5055,W,90,9414290,46026,"Near Balboa/Stairwells; west-facing; offshore wind ~E"
-ocean_beach_mid,Ocean Beach (Mid),San Francisco,37.7687,-122.5055,W,90,9414290,46026,"Around Noriega/Taraval; west-facing"
-ocean_beach_s,Ocean Beach (South),San Francisco,37.7300,-122.5015,W,90,9414290,46026,"Toward Sloat/Sharp Park area"
+ocean_beach_n,Ocean Beach (North),San Francisco,37.8066,-122.5105,W,90,9414290,46026,"Near Balboa/Stairwells; west-facing; offshore wind ~E"
+ocean_beach_mid,Ocean Beach (Mid),San Francisco,37.7687,-122.5105,W,90,9414290,46026,"Around Noriega/Taraval; west-facing"
+ocean_beach_s,Ocean Beach (South),San Francisco,37.7300,-122.5070,W,90,9414290,46026,"Toward Sloat/Funston; west-facing"
+baker_beach,Baker Beach,San Francisco,37.7936,-122.4842,W,90,9414290,46026,"Protected by headlands; can differ from Ocean Beach"
+china_beach,China Beach,San Francisco,37.7897,-122.4825,NW,110,9414290,46026,"Sheltered cove; still show regional conditions"
 
 pacifica_linda_mar,Pacifica (Linda Mar),San Mateo,37.5936,-122.5067,W,90,9414290,46026,"Popular beginner beachbreak"
 rockaway_beach,Pacifica (Rockaway),San Mateo,37.6117,-122.5008,W,90,9414290,46026,"Often bigger/cleaner than Linda Mar"
 sharp_park,Pacifica (Sharp Park),San Mateo,37.6376,-122.4964,W,90,9414290,46026,"South Pacifica beachbreak"
 mussel_rock,Mussel Rock,San Mateo,37.6645,-122.4999,W,90,9414290,46026,"Exposed; can be powerful"
+
+fort_funston,Fort Funston,San Francisco,37.7207,-122.5059,W,90,9414290,46026,"South Ocean Beach; exposed"
 
 stinson_beach,Stinson Beach,Marin,37.9003,-122.6445,SW,45,9415020,46013,"Offshore often from NE; set approx 45 deg"
 bolinas,Bolinas,Marin,37.9093,-122.6866,SW,45,9415020,46013,"Protected by Point Reyes; still uses regional buoy"

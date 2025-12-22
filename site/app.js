@@ -98,9 +98,9 @@ function buildPopupHtml(p) {
   const tide = p?.sources?.tideStation || p?.tideStation || "—";
 
   return `
-    <div style="min-width:240px; font-family:inherit;">
+    <div style="min-width:240px; font-family:inherit; color:#111;">
       <div style="font-weight:800; font-size:14px; margin-bottom:6px;">${p.name || "Unknown"}</div>
-      <div style="font-size:12px; opacity:0.9; margin-bottom:10px;">${p.region || ""}</div>
+      <div style="font-size:12px; color:#333; margin-bottom:10px;">${p.region || ""}</div>
 
       <div style="font-size:12px; line-height:1.4;">
         <div><b>Quality score:</b> ${fmtMaybe(p.qualityScore)} / 100</div>
@@ -111,7 +111,7 @@ function buildPopupHtml(p) {
         <div><b>Tide:</b> ${fmtMaybe(p.tideHeightFt, " ft")} ${p.tideTrend ? `(${p.tideTrend})` : ""}</div>
       </div>
 
-      <div style="margin-top:10px; font-size:11px; opacity:0.85;">
+      <div style="margin-top:10px; font-size:11px; color:#444;">
         <div><b>NDBC buoy:</b> ${ndbc}</div>
         <div><b>Tide station:</b> ${tide}</div>
         <div><b>Generated:</b> ${p?.timestamps?.generatedAt ? new Date(p.timestamps.generatedAt).toUTCString() : "—"}</div>
@@ -208,7 +208,7 @@ async function main() {
       const bounds = computeFeatureBounds(beachesGeojson);
       if (!bounds.isEmpty()) {
         // Expand the bounds a bit so the map has breathing room.
-        const padded = bounds.pad(0.35);
+        const padded = bounds.pad(0.22);
         map.fitBounds(padded, { padding: 36, duration: 0, maxZoom: 10.8 });
         map.setMaxBounds(padded);
         map.setMinZoom(8.2);

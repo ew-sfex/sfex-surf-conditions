@@ -1,6 +1,30 @@
 {
-  "generatedAt": null,
-  "sources": {}
+  "generatedAt": "2026-01-29T21:25:24.451325+00:00",
+  "sources": {
+    "ndbc": {
+      "base": "https://www.ndbc.noaa.gov/data/realtime2",
+      "stationsRequested": [
+        "46013",
+        "46026"
+      ],
+      "stationsOK": [
+        "46013",
+        "46026"
+      ],
+      "stationsError": {}
+    },
+    "coops": {
+      "base": "https://api.tidesandcurrents.noaa.gov/api/prod/datagetter",
+      "stationsRequested": [
+        "9414290",
+        "9415020"
+      ],
+      "stationsError": {}
+    },
+    "open_meteo": {
+      "base": "https://api.open-meteo.com/v1/forecast",
+      "ok": true,
+      "error": null
+    }
+  }
 }
-
-

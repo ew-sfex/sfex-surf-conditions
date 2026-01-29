@@ -9,6 +9,70 @@ const DATA_SUMMARY_URL = "./data/summary.json";
 const SOURCE_ID = "beaches";
 const LAYER_ID = "beach-points";
 
+const METRIC_STYLES = {
+  qualityScore: {
+    stops: [35, 55, 75],
+    colors: ["#e2554f", "#f0c24b", "#2fb95c", "#1bb7a6"],
+    defaultValue: 0,
+    legend: {
+      title: "Quality score (0-100)",
+      note: "Blend of swell (50), wind (30), and tide (20).",
+      items: [
+        { label: "Poor (0-35)", color: "#e2554f" },
+        { label: "Fair (35-55)", color: "#f0c24b" },
+        { label: "Good (55-75)", color: "#2fb95c" },
+        { label: "Great (75+)", color: "#1bb7a6" },
+      ],
+    },
+  },
+  waveHeightFt: {
+    stops: [1, 3, 5, 8, 12],
+    colors: ["#5b2b7a", "#2f4ba0", "#1e88a8", "#2fb95c", "#f0c24b", "#e2554f"],
+    defaultValue: 0,
+    legend: {
+      title: "Wave height (ft)",
+      items: [
+        { label: "< 1 ft", color: "#5b2b7a" },
+        { label: "1-3 ft", color: "#2f4ba0" },
+        { label: "3-5 ft", color: "#1e88a8" },
+        { label: "5-8 ft", color: "#2fb95c" },
+        { label: "8-12 ft", color: "#f0c24b" },
+        { label: "12+ ft", color: "#e2554f" },
+      ],
+    },
+  },
+  windSuitability: {
+    stops: [0.2, 0.5, 0.8],
+    colors: ["#e2554f", "#f0c24b", "#2fb95c", "#1bb7a6"],
+    defaultValue: 0.5,
+    legend: {
+      title: "Wind suitability",
+      note: "1 = light offshore, 0 = strong onshore.",
+      items: [
+        { label: "Poor (0-0.2)", color: "#e2554f" },
+        { label: "OK (0.2-0.5)", color: "#f0c24b" },
+        { label: "Good (0.5-0.8)", color: "#2fb95c" },
+        { label: "Great (0.8+)", color: "#1bb7a6" },
+      ],
+    },
+  },
+  tideHeightFt: {
+    stops: [1, 3, 5, 7],
+    colors: ["#2f4ba0", "#1e88a8", "#2fb95c", "#f0c24b", "#e2554f"],
+    defaultValue: 0,
+    legend: {
+      title: "Tide height (ft)",
+      items: [
+        { label: "< 1 ft", color: "#2f4ba0" },
+        { label: "1-3 ft", color: "#1e88a8" },
+        { label: "3-5 ft", color: "#2fb95c" },
+        { label: "5-7 ft", color: "#f0c24b" },
+        { label: "7+ ft", color: "#e2554f" },
+      ],
+    },
+  },
+};
+
 function $(id) {
   return document.getElementById(id);
 }
@@ -20,66 +84,39 @@ function fmtMaybe(v, suffix = "") {
 
 function qualityColorExpression(metric) {
   const m = metric || "qualityScore";
+  const style = METRIC_STYLES[m] || METRIC_STYLES.qualityScore;
+  const expr = ["step", ["coalesce", ["get", m], style.defaultValue], style.colors[0]];
+  style.stops.forEach((stop, idx) => {
+    expr.push(stop, style.colors[idx + 1]);
+  });
+  return expr;
+}
 
-  if (m === "waveHeightFt") {
-    return [
-      "step",
-      ["coalesce", ["get", "waveHeightFt"], 0],
-      "#5b2b7a",
-      1,
-      "#2f4ba0",
-      3,
-      "#1e88a8",
-      5,
-      "#2fb95c",
-      8,
-      "#f0c24b",
-      12,
-      "#e2554f",
-    ];
-  }
+function renderLegend(metric) {
+  const legendEl = document.getElementById("legend");
+  if (!legendEl) return;
+  const m = metric || "qualityScore";
+  const style = METRIC_STYLES[m] || METRIC_STYLES.qualityScore;
+  const title = style.legend?.title || "Legend";
+  const note = style.legend?.note;
+  const items = style.legend?.items || [];
 
-  if (m === "windSuitability") {
-    return [
-      "step",
-      ["coalesce", ["get", "windSuitability"], 0.5],
-      "#e2554f",
-      0.2,
-      "#f0c24b",
-      0.5,
-      "#2fb95c",
-      0.8,
-      "#1bb7a6",
-    ];
-  }
+  const rows = items
+    .map(
+      (item) => `
+        <div class="legend-item">
+          <span class="legend-swatch" style="background:${item.color};"></span>
+          <span class="legend-label">${item.label}</span>
+        </div>
+      `
+    )
+    .join("");
 
-  if (m === "tideHeightFt") {
-    return [
-      "step",
-      ["coalesce", ["get", "tideHeightFt"], 0],
-      "#2f4ba0",
-      1,
-      "#1e88a8",
-      3,
-      "#2fb95c",
-      5,
-      "#f0c24b",
-      7,
-      "#e2554f",
-    ];
-  }
-
-  return [
-    "step",
-    ["coalesce", ["get", "qualityScore"], 0],
-    "#e2554f",
-    35,
-    "#f0c24b",
-    55,
-    "#2fb95c",
-    75,
-    "#1bb7a6",
-  ];
+  legendEl.innerHTML = `
+    <div class="legend-title">${title}</div>
+    ${note ? `<div class="legend-note">${note}</div>` : ""}
+    <div class="legend-items">${rows}</div>
+  `;
 }
 
 function buildTooltipHtml(p) {
@@ -100,25 +137,49 @@ function buildPopupHtml(p) {
   const windSrc = p?.windSource || "—";
 
   return `
-    <div style="min-width:240px; font-family:inherit; color:#111;">
-      <div style="font-weight:800; font-size:14px; margin-bottom:6px;">${p.name || "Unknown"}</div>
-      <div style="font-size:12px; color:#333; margin-bottom:10px;">${p.region || ""}</div>
+    <div class="popup">
+      <div class="popup-title">${p.name || "Unknown"}</div>
+      ${p.region ? `<div class="popup-subtitle">${p.region}</div>` : ""}
 
-      <div style="font-size:12px; line-height:1.4;">
-        <div><b>Quality score:</b> ${fmtMaybe(p.qualityScore)} / 100</div>
-        <div><b>Wave height:</b> ${fmtMaybe(p.waveHeightFt, " ft")}</div>
-        <div><b>Period:</b> ${fmtMaybe(p.dominantPeriodS, " s")}</div>
-        <div><b>Wave dir:</b> ${fmtMaybe(p.waveDirectionDeg, "°")}</div>
-        <div><b>Wind:</b> ${fmtMaybe(p.windSpeedMph, " mph")} from ${fmtMaybe(p.windDirectionDeg, "°")}</div>
-        <div><b>Tide:</b> ${fmtMaybe(p.tideHeightFt, " ft")} ${p.tideTrend ? `(${p.tideTrend})` : ""}</div>
+      <div class="popup-section">
+        <div class="popup-section-title">Quality</div>
+        <div class="popup-row"><span>Score</span><span>${fmtMaybe(p.qualityScore)} / 100</span></div>
       </div>
 
-      <div style="margin-top:10px; font-size:11px; color:#444;">
-        <div><b>NDBC buoy:</b> ${ndbc}</div>
-        <div><b>Tide station:</b> ${tide}</div>
-        <div><b>Wind source:</b> ${windSrc}</div>
-        <div><b>Generated:</b> ${p?.timestamps?.generatedAt ? new Date(p.timestamps.generatedAt).toUTCString() : "—"}</div>
-        <div><b>Buoy obs:</b> ${p?.timestamps?.ndbcObservedAt ? new Date(p.timestamps.ndbcObservedAt).toUTCString() : "—"}</div>
+      <div class="popup-section">
+        <div class="popup-section-title">Waves</div>
+        <div class="popup-row"><span>Height</span><span>${fmtMaybe(p.waveHeightFt, " ft")}</span></div>
+        <div class="popup-row"><span>Period</span><span>${fmtMaybe(p.dominantPeriodS, " s")}</span></div>
+        <div class="popup-row"><span>Direction</span><span>${fmtMaybe(p.waveDirectionDeg, "°")}</span></div>
+      </div>
+
+      <div class="popup-section">
+        <div class="popup-section-title">Wind</div>
+        <div class="popup-row"><span>Speed</span><span>${fmtMaybe(p.windSpeedMph, " mph")}</span></div>
+        <div class="popup-row"><span>Direction</span><span>${fmtMaybe(p.windDirectionDeg, "°")}</span></div>
+      </div>
+
+      <div class="popup-section">
+        <div class="popup-section-title">Tide</div>
+        <div class="popup-row">
+          <span>Height</span>
+          <span>${fmtMaybe(p.tideHeightFt, " ft")} ${p.tideTrend ? `(${p.tideTrend})` : ""}</span>
+        </div>
+      </div>
+
+      <div class="popup-section popup-section-meta">
+        <div class="popup-section-title">Sources</div>
+        <div class="popup-row"><span>NDBC buoy</span><span>${ndbc}</span></div>
+        <div class="popup-row"><span>Tide station</span><span>${tide}</span></div>
+        <div class="popup-row"><span>Wind source</span><span>${windSrc}</span></div>
+        <div class="popup-row">
+          <span>Generated</span>
+          <span>${p?.timestamps?.generatedAt ? new Date(p.timestamps.generatedAt).toUTCString() : "—"}</span>
+        </div>
+        <div class="popup-row">
+          <span>Buoy obs</span>
+          <span>${p?.timestamps?.ndbcObservedAt ? new Date(p.timestamps.ndbcObservedAt).toUTCString() : "—"}</span>
+        </div>
       </div>
     </div>
   `;
@@ -193,8 +254,11 @@ async function main() {
 
   const statusEl = $("status");
   const metricSelect = $("metricSelect");
+  renderLegend(metricSelect?.value);
 
   let beachesGeojson = null;
+  let activePopup = null;
+  let activePopupLocationId = null;
 
   async function loadDataAndRefreshSource() {
     try {
@@ -248,7 +312,10 @@ async function main() {
       },
     });
 
-    metricSelect.addEventListener("change", () => applyMetricStyle(metricSelect.value));
+    metricSelect.addEventListener("change", () => {
+      applyMetricStyle(metricSelect.value);
+      renderLegend(metricSelect.value);
+    });
 
     map.on("mouseenter", LAYER_ID, () => {
       map.getCanvas().style.cursor = "pointer";
@@ -262,6 +329,10 @@ async function main() {
       const f = e.features && e.features[0];
       if (!f) return;
       const p = f.properties || {};
+      if (activePopupLocationId && p?.id && activePopupLocationId === p.id) {
+        tooltip.style.display = "none";
+        return;
+      }
       const props = { ...p };
       ["qualityScore", "waveHeightFt", "dominantPeriodS", "windSpeedMph", "tideHeightFt", "windSuitability"].forEach(
         (k) => {
@@ -283,10 +354,22 @@ async function main() {
       const coords = f.geometry.coordinates.slice();
       const p = f.properties || {};
 
-      new mapboxgl.Popup({ closeButton: true, maxWidth: "320px" })
+      if (activePopup) {
+        activePopup.remove();
+        activePopup = null;
+      }
+      activePopupLocationId = p?.id || null;
+      tooltip.style.display = "none";
+
+      activePopup = new mapboxgl.Popup({ closeButton: true, maxWidth: "320px" })
         .setLngLat(coords)
         .setHTML(buildPopupHtml(p))
         .addTo(map);
+
+      activePopup.on("close", () => {
+        activePopupLocationId = null;
+        activePopup = null;
+      });
     });
 
     setInterval(() => {

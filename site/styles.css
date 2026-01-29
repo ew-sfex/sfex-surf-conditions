@@ -84,6 +84,15 @@ select {
   height: 100%;
 }
 
+.mapboxgl-canvas {
+  position: relative;
+  z-index: 1;
+}
+
+.mapboxgl-control-container {
+  z-index: 3;
+}
+
 .footer {
   padding: 10px 12px;
   font-size: clamp(12px, 0.7vw + 9px, 14px);
@@ -148,6 +157,7 @@ select {
   max-width: 200px;
   box-shadow: 0 10px 30px rgba(5, 8, 18, 0.35);
   backdrop-filter: blur(6px);
+  z-index: 4;
 }
 
 .legend-title {
@@ -185,12 +195,13 @@ select {
 }
 
 .mapboxgl-popup-content {
-  background: var(--panel);
-  color: var(--text);
+  background: var(--panel) !important;
+  color: var(--text) !important;
   border: 1px solid var(--border);
   border-radius: 12px;
   padding: 12px 12px 10px;
   font-size: clamp(12px, 0.75vw + 9px, 14px);
+  box-shadow: 0 12px 30px rgba(5, 8, 18, 0.4);
 }
 
 .mapboxgl-popup-tip {
@@ -236,6 +247,14 @@ select {
   justify-content: space-between;
   gap: 10px;
   line-height: 1.4;
+}
+
+.popup-row span:last-child {
+  font-weight: 600;
+}
+
+.mapboxgl-popup-close-button {
+  color: var(--text);
 }
 
 .popup-section-meta {

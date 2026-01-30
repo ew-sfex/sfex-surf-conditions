@@ -551,6 +551,7 @@ def main() -> int:
 
     beaches_geojson_path = os.path.join(out_dir, "beaches.geojson")
     summary_path = os.path.join(out_dir, "summary.json")
+    history_path = os.path.join(out_dir, "history_72h.json")
 
     with open(beaches_geojson_path, "w", encoding="utf-8") as f:
         json.dump(fc, f, ensure_ascii=False, separators=(",", ":"))
@@ -578,6 +579,55 @@ def main() -> int:
     }
     with open(summary_path, "w", encoding="utf-8") as f:
         json.dump(summary, f, ensure_ascii=False, indent=2)
+
+    # Maintain a rolling 72-hour history for lightweight charting.
+    history_cutoff = now - timedelta(hours=72)
+    history: List[Dict[str, Any]] = []
+    if os.path.exists(history_path):
+        try:
+            with open(history_path, "r", encoding="utf-8") as f:
+                history = json.load(f) or []
+        except Exception:
+            history = []
+
+    def parse_ts(ts: str) -> Optional[datetime]:
+        try:
+            parsed = datetime.fromisoformat(ts)
+            if parsed.tzinfo is None:
+                parsed = parsed.replace(tzinfo=timezone.utc)
+            return parsed
+        except Exception:
+            return None
+
+    history = [
+        entry
+        for entry in history
+        if isinstance(entry, dict)
+        and isinstance(entry.get("generatedAt"), str)
+        and (parse_ts(entry["generatedAt"]) or history_cutoff) >= history_cutoff
+    ]
+
+    history.append(
+        {
+            "generatedAt": now.isoformat(),
+            "points": [
+                {
+                    "id": f["properties"].get("id"),
+                    "qualityScore": f["properties"].get("qualityScore"),
+                    "waveHeightFt": f["properties"].get("waveHeightFt"),
+                    "dominantPeriodS": f["properties"].get("dominantPeriodS"),
+                    "windSpeedMph": f["properties"].get("windSpeedMph"),
+                    "windDirectionDeg": f["properties"].get("windDirectionDeg"),
+                    "tideHeightFt": f["properties"].get("tideHeightFt"),
+                    "tideTrend": f["properties"].get("tideTrend"),
+                }
+                for f in features
+            ],
+        }
+    )
+
+    with open(history_path, "w", encoding="utf-8") as f:
+        json.dump(history, f, ensure_ascii=False, separators=(",", ":"))
 
     print(f"Wrote {beaches_geojson_path}")
     print(f"Wrote {summary_path}")

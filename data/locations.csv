@@ -1,22 +1,22 @@
 id,name,region,lat,lon,primary_exposure,offshore_wind_dir_deg,tide_station,ndbc_station,notes
-ocean_beach_n,Ocean Beach (North),San Francisco,37.7728,-122.5100,W,90,9414290,46026,"Near Great Hwy & Fulton; north Ocean Beach access"
+ocean_beach_n,Ocean Beach (North),San Francisco,37.7728,-122.5110,W,90,9414290,46026,"Near Great Hwy & Fulton; north Ocean Beach access"
 ocean_beach_mid,Ocean Beach (Mid),San Francisco,37.7547,-122.5100,W,90,9414290,46026,"Near Great Hwy & Noriega; mid Ocean Beach access"
-ocean_beach_s,Ocean Beach (South),San Francisco,37.7347,-122.5092,W,90,9414290,46026,"Near Great Hwy & Sloat; south Ocean Beach access"
+ocean_beach_s,Ocean Beach (South),San Francisco,37.7347,-122.5082,W,90,9414290,46026,"Near Great Hwy & Sloat; south Ocean Beach access"
 baker_beach,Baker Beach,San Francisco,37.7936,-122.4842,W,90,9414290,46026,"Protected by headlands; can differ from Ocean Beach"
-china_beach,China Beach,San Francisco,37.7897,-122.4825,NW,110,9414290,46026,"Sheltered cove; still show regional conditions"
+china_beach,China Beach,San Francisco,37.7897,-122.4835,NW,110,9414290,46026,"Sheltered cove; still show regional conditions"
 crissy_field,Crissy Field,San Francisco,37.8056,-122.4659,N,180,9414290,46026,"Inside Golden Gate; not ocean swell surf, but was included in earlier version"
-aquatic_park,Aquatic Park,San Francisco,37.8060,-122.4230,NA,0,9414290,46026,"Bay conditions context (not ocean surf); included in earlier version"
+aquatic_park,Aquatic Park,San Francisco,37.8070,-122.4230,NA,0,9414290,46026,"Bay conditions context (not ocean surf); included in earlier version"
 
-pacifica_linda_mar,Pacifica (Linda Mar),San Mateo,37.5936,-122.5067,W,90,9414290,46026,"Popular beginner beachbreak"
-rockaway_beach,Pacifica (Rockaway),San Mateo,37.6117,-122.5008,W,90,9414290,46026,"Often bigger/cleaner than Linda Mar"
-sharp_park,Pacifica (Sharp Park),San Mateo,37.6376,-122.4964,W,90,9414290,46026,"South Pacifica beachbreak"
-mussel_rock,Mussel Rock,San Mateo,37.6645,-122.4999,W,90,9414290,46026,"Exposed; can be powerful"
+pacifica_linda_mar,Pacifica (Linda Mar),San Mateo,37.5946,-122.5057,W,90,9414290,46026,"Popular beginner beachbreak"
+rockaway_beach,Pacifica (Rockaway),San Mateo,37.6117,-122.4998,W,90,9414290,46026,"Often bigger/cleaner than Linda Mar"
+sharp_park,Pacifica (Sharp Park),San Mateo,37.6376,-122.4954,W,90,9414290,46026,"South Pacifica beachbreak"
+mussel_rock,Mussel Rock,San Mateo,37.6645,-122.4989,W,90,9414290,46026,"Exposed; can be powerful"
 
-fort_funston,Fort Funston,San Francisco,37.7207,-122.5059,W,90,9414290,46026,"South Ocean Beach; exposed"
+fort_funston,Fort Funston,San Francisco,37.7207,-122.5069,W,90,9414290,46026,"South Ocean Beach; exposed"
 
 half_moon_bay,Half Moon Bay (Surfer's Beach),San Mateo,37.5018,-122.4806,NW,120,9414290,46026,"Added back (was in earlier version); still using SF buoy as v1 regional proxy"
 
-stinson_beach,Stinson Beach,Marin,37.9003,-122.6445,SW,45,9415020,46013,"Offshore often from NE; set approx 45 deg"
-bolinas,Bolinas,Marin,37.9093,-122.6866,SW,45,9415020,46013,"Protected by Point Reyes; still uses regional buoy"
+stinson_beach,Stinson Beach,Marin,37.8993,-122.6455,SW,45,9415020,46013,"Offshore often from NE; set approx 45 deg"
+bolinas,Bolinas,Marin,37.9083,-122.6856,SW,45,9415020,46013,"Protected by Point Reyes; still uses regional buoy"
 
 

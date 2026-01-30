@@ -204,6 +204,10 @@ select {
   box-shadow: 0 12px 30px rgba(5, 8, 18, 0.4);
 }
 
+.mapboxgl-popup {
+  z-index: 5;
+}
+
 .mapboxgl-popup-tip {
   border-top-color: var(--panel);
   border-bottom-color: var(--panel);

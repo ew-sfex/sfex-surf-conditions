@@ -16,6 +16,7 @@ import requests
 NDBC_REALTIME2_BASE = "https://www.ndbc.noaa.gov/data/realtime2"
 COOPS_DATAGETTER = "https://api.tidesandcurrents.noaa.gov/api/prod/datagetter"
 OPEN_METEO = "https://api.open-meteo.com/v1/forecast"
+HISTORY_URL = "https://ew-sfex.github.io/sfex-surf-conditions/data/history_72h.json"
 
 APP_ID = "sfexaminer-surf-conditions"
 
@@ -587,6 +588,14 @@ def main() -> int:
         try:
             with open(history_path, "r", encoding="utf-8") as f:
                 history = json.load(f) or []
+        except Exception:
+            history = []
+    else:
+        # GH Actions starts from a clean checkout; pull the last published history.
+        try:
+            resp = requests.get(HISTORY_URL, timeout=15, headers={"User-Agent": APP_ID})
+            if resp.ok:
+                history = resp.json() or []
         except Exception:
             history = []
 

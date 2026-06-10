@@ -1,0 +1,28 @@
+name: Keepalive
+
+# Prevents GitHub from auto-disabling the scheduled "Update surf data"
+# workflow. GitHub disables scheduled workflows after 60 days with no repo
+# commit activity; this job runs periodically and makes a minimal commit
+# only when the repo is approaching that limit.
+
+on:
+  schedule:
+    # Weekly, Mondays at 9:00 AM UTC
+    - cron: '0 9 * * 1'
+  workflow_dispatch:
+
+permissions:
+  actions: write
+  contents: write
+
+jobs:
+  keepalive:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Keep workflows alive
+        uses: gautamkrishnar/keepalive-workflow@v2
+        with:
+          time_elapsed: '45'

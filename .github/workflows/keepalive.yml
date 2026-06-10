@@ -1,9 +1,11 @@
 name: Keepalive
 
 # Prevents GitHub from auto-disabling the scheduled "Update surf data"
-# workflow. GitHub disables scheduled workflows after 60 days with no repo
-# commit activity; this job runs periodically and makes a minimal commit
-# only when the repo is approaching that limit.
+# workflow. GitHub disables scheduled workflows after ~60 days with no repo
+# commit activity. This job runs weekly and makes a single empty commit
+# only when the repo has been idle for 45+ days. Uses no third-party
+# actions (only first-party actions/checkout) and grants contents:write so
+# the push succeeds.
 
 on:
   schedule:
@@ -12,7 +14,6 @@ on:
   workflow_dispatch:
 
 permissions:
-  actions: write
   contents: write
 
 jobs:
@@ -22,7 +23,16 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Keep workflows alive
-        uses: gautamkrishnar/keepalive-workflow@v2
-        with:
-          time_elapsed: '45'
+      - name: Empty commit if repo has been idle
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          last=$(git log -1 --format=%ct)
+          now=$(date +%s)
+          days=$(( (now - last) / 86400 ))
+          if [ "$days" -ge 45 ]; then
+            git commit --allow-empty -m "chore: keepalive [skip ci]"
+            git push
+          else
+            echo "Last commit $days days ago; keepalive not needed yet."
+          fi
